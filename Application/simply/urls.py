@@ -8,7 +8,7 @@ from home.views import CustomPasswordResetView, CustomPasswordResetConfirmView
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('',include('home.urls')),
     path('password_reset/', CustomPasswordResetView.as_view(), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name = 'home/reset_password_sent.html'), name='password_reset_done'),
