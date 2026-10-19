@@ -1,3 +1,8 @@
 Application/.env
 venv/
 .env
+
+Terraform/.terraform/
+Terraform/.terraform.lock.hcl
+Terraform/key.json
+Terraform/*.tfvars
