@@ -4,7 +4,6 @@ metadata:
   name: app-deployment
   namespace: {{ .Values.namespace }}
 spec:
-  replicas: {{ .Values.app.replicaCount }}
   selector:
     matchLabels:
       app: my-app

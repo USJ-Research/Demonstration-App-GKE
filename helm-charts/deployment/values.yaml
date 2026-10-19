@@ -5,7 +5,6 @@ app:
     repository: ""
     tag: ""
     pullPolicy: Always
-  replicaCount: 1
   containerPort: ""
   resources:
     requests:
