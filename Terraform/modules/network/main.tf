@@ -15,17 +15,17 @@ resource "google_compute_subnetwork" "subnet" {
   region        = var.region
 }
 
-resource "google_compute_firewall" "allow-http" {
-  name          = "allow-http"
-  network       = google_compute_network.vpc.id
-  priority      = 1000
-  direction     = "INGRESS"
-  source_ranges = ["0.0.0.0/0"]
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-}
+# resource "google_compute_firewall" "allow-http" {
+#   name          = "allow-http"
+#   network       = google_compute_network.vpc.id
+#   priority      = 1000
+#   direction     = "INGRESS"
+#   source_ranges = ["0.0.0.0/0"]
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["80"]
+#   }
+# }
 
 resource "google_compute_firewall" "allow-https" {
   name          = "allow-https"
