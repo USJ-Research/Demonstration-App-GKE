@@ -1,0 +1,224 @@
+name: Monitoring Stack Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Kubernetes namespace to deploy into"
+        required: true
+        type: choice
+        options:
+          - logger
+
+permissions:
+  contents: read
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  GKE_CLUSTER: ${{ secrets.CLUSTER_NAME }}
+  GKE_ZONE: ${{ secrets.ZONE }}
+  K8S_NAMESPACE: ${{ github.event.inputs.namespace }}
+
+jobs:
+  monitoring-deploy:
+    name: Deploy Monitoring Stack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: gke-gcloud-auth-plugin
+
+      - name: Connect to GKE Cluster
+        run: gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE" --project "$GCP_PROJECT_ID"
+
+      - name: Ensure namespace exists
+        run: kubectl create namespace "$K8S_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Fix namespace ownership for Helm
+        run: |
+          kubectl label namespace "$K8S_NAMESPACE" app.kubernetes.io/managed-by=Helm --overwrite
+          kubectl annotate namespace "$K8S_NAMESPACE" meta.helm.sh/release-name=prometheus --overwrite
+          kubectl annotate namespace "$K8S_NAMESPACE" meta.helm.sh/release-namespace="$K8S_NAMESPACE" --overwrite
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Add Helm repos
+        run: |
+          set -e
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo update
+
+      - name: Install/Upgrade Prometheus + Grafana
+        run: |
+          set -e
+          helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+            --namespace "$K8S_NAMESPACE" \
+            --create-namespace \
+            --set grafana.persistence.enabled=true \
+            --set grafana.persistence.type=sts \
+            --set grafana.persistence.size=2Gi \
+            --set grafana.persistence.storageClassName=standard-rwo \
+            --set-string grafana.adminUser="${{ secrets.GRAFANA_ADMIN_USER }}" \
+            --set-string grafana.adminPassword="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            --set grafana.resources.requests.cpu=200m \
+            --set grafana.resources.requests.memory=256Mi \
+            --set grafana.resources.limits.cpu=750m \
+            --set grafana.resources.limits.memory=768Mi \
+            --set prometheus.prometheusSpec.retention=30d \
+            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=30Gi \
+            --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=standard-rwo \
+            --set prometheus.prometheusSpec.resources.requests.cpu=750m \
+            --set prometheus.prometheusSpec.resources.requests.memory=1.5Gi \
+            --set prometheus.prometheusSpec.resources.limits.cpu=1500m \
+            --set prometheus.prometheusSpec.resources.limits.memory=3Gi \
+            --set alertmanager.alertmanagerSpec.retention=720h \
+            --set alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage=2Gi \
+            --set alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName=standard-rwo \
+            --set alertmanager.alertmanagerSpec.resources.requests.cpu=50m \
+            --set alertmanager.alertmanagerSpec.resources.requests.memory=64Mi \
+            --set alertmanager.alertmanagerSpec.resources.limits.cpu=100m \
+            --set alertmanager.alertmanagerSpec.resources.limits.memory=128Mi \
+            --set kube-state-metrics.resources.requests.cpu=50m \
+            --set kube-state-metrics.resources.requests.memory=64Mi \
+            --set kube-state-metrics.resources.limits.cpu=100m \
+            --set kube-state-metrics.resources.limits.memory=128Mi \
+            --set prometheusOperator.resources.requests.cpu=50m \
+            --set prometheusOperator.resources.requests.memory=64Mi \
+            --set prometheusOperator.resources.limits.cpu=100m \
+            --set prometheusOperator.resources.limits.memory=128Mi \
+            --set prometheus-node-exporter.resources.requests.cpu=25m \
+            --set prometheus-node-exporter.resources.requests.memory=32Mi \
+            --set prometheus-node-exporter.resources.limits.cpu=50m \
+            --set prometheus-node-exporter.resources.limits.memory=64Mi \
+            --atomic \
+            --timeout 10m
+
+      - name: Write Loki values file
+        run: |
+          cat <<EOF > loki-values.yaml
+          deploymentMode: SingleBinary
+
+          loki:
+            auth_enabled: false
+            commonConfig:
+              replication_factor: 1
+            storage:
+              type: filesystem
+            schemaConfig:
+              configs:
+                - from: "2024-01-01"
+                  store: tsdb
+                  object_store: filesystem
+                  schema: v13
+                  index:
+                    prefix: loki_index_
+                    period: 24h
+            limits_config:
+              query_timeout: 300s
+              max_query_length: 0
+              max_entries_limit_per_query: 5000
+              retention_period: 720h
+            compactor:
+              retention_enabled: true
+              delete_request_store: filesystem
+
+          singleBinary:
+            replicas: 1
+            persistence:
+              enabled: true
+              size: 30Gi
+              storageClass: standard-rwo
+            resources:
+              requests:
+                cpu: 750m
+                memory: 768Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi
+            service:
+              type: ClusterIP
+
+          read:
+            replicas: 0
+          write:
+            replicas: 0
+          backend:
+            replicas: 0
+
+          gateway:
+            enabled: false
+
+          test:
+            enabled: false
+
+          lokiCanary:
+            enabled: false
+
+          chunksCache:
+            enabled: false
+
+          resultsCache:
+            enabled: true
+          EOF
+          cat loki-values.yaml
+
+      - name: Install/Upgrade Loki
+        run: |
+          set -e
+          helm upgrade --install loki grafana/loki \
+            --namespace "$K8S_NAMESPACE" \
+            --create-namespace \
+            -f loki-values.yaml \
+            --atomic \
+            --timeout 10m
+
+      - name: Write Promtail values file
+        run: |
+          cat <<EOF > promtail-values.yaml
+          config:
+            clients:
+              - url: http://loki.$K8S_NAMESPACE.svc.cluster.local:3100/loki/api/v1/push
+            snippets:
+              pipelineStages:
+                - cri: {}
+                - drop:
+                    expression: "(No migrations to apply.|Running migrations:|Operations to perform:|Apply all migrations|No changes detected)"
+
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          EOF
+          cat promtail-values.yaml
+
+      - name: Install/Upgrade Promtail
+        run: |
+          set -e
+          helm upgrade --install promtail grafana/promtail \
+            --namespace "$K8S_NAMESPACE" \
+            --create-namespace \
+            -f promtail-values.yaml \
+            --atomic \
+            --timeout 10m
+
+      - name: Verify pods
+        run: |
+          kubectl get pods --namespace "$K8S_NAMESPACE"
+          kubectl get svc --namespace "$K8S_NAMESPACE"
