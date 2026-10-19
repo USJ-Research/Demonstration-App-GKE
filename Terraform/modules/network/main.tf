@@ -27,17 +27,17 @@ resource "google_compute_subnetwork" "subnet" {
 #   }
 # }
 
-resource "google_compute_firewall" "allow-https" {
-  name          = "allow-https"
-  network       = google_compute_network.vpc.id
-  priority      = 1000
-  direction     = "INGRESS"
-  source_ranges = ["0.0.0.0/0"]
-  allow {
-    protocol = "tcp"
-    ports    = ["443"]
-  }
-}
+# resource "google_compute_firewall" "allow-https" {
+#   name          = "allow-https"
+#   network       = google_compute_network.vpc.id
+#   priority      = 1000
+#   direction     = "INGRESS"
+#   source_ranges = ["0.0.0.0/0"]
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["443"]
+#   }
+# }
 
 output "vpc_name"    { value = google_compute_network.vpc.name }
 output "subnet_name" { value = google_compute_subnetwork.subnet.name }
