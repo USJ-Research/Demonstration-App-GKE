@@ -6,3 +6,7 @@ Terraform/.terraform/
 Terraform/.terraform.lock.hcl
 Terraform/key.json
 Terraform/*.tfvars
+
+k8s-manifests/secrets.yaml
+
+K8S-Manifests/
