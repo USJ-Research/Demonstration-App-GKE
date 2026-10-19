@@ -77,10 +77,10 @@ jobs:
             --set app.image.repository="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPOSITORY/$IMAGE_NAME" \
             --set app.image.tag="$IMAGE_TAG" \
             --set app.containerPort="8000" \
-            --set app.resources.requests.cpu="100m" \
-            --set app.resources.requests.memory="128Mi" \
-            --set app.resources.limits.cpu="250m" \
-            --set app.resources.limits.memory="256Mi" \
+            --set app.resources.requests.cpu="150m" \
+            --set app.resources.requests.memory="256Mi" \
+            --set app.resources.limits.cpu="300m" \
+            --set app.resources.limits.memory="384Mi" \
             --set service.name="app-svc" \
             --set service.port="8000" \
             --set service.targetPort="8000" \
