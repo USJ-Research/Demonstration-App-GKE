@@ -8,7 +8,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 
 
 SECRET_KEY = env("SECRET_KEY")
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://logger.duvindu.org']
 CSRF_COOKIE_AGE = 60 * 60 * 24  # 1 day
