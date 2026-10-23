@@ -178,7 +178,7 @@
           </div>
           <div class="room__message">
             <form method="POST">
-                {% csrf_token %}
+                {% comment %} {% csrf_token %} {% endcomment %}
                 <input name="body" placeholder="Write your message here..." />
             </form>
           </div>
