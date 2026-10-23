@@ -11,6 +11,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://logger.duvindu.org']
+CSRF_COOKIE_AGE = 60 * 60 * 24  # 1 day
 
 
 INSTALLED_APPS = [

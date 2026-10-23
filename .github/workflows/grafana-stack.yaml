@@ -192,7 +192,7 @@ jobs:
               pipelineStages:
                 - cri: {}
                 - drop:
-                    expression: "(No migrations to apply.|Running migrations:|Operations to perform:|Apply all migrations|No changes detected)"
+                    expression: "(No migrations to apply.|Running migrations:|Operations to perform:|Apply all migrations|No changes detected|HEALTH_SUCCESS|HEALTH_FAILED|START_SUCCESS|START_FAILED|READY_SUCCESS|READY_FAILED|LIVE_SUCCESS|LIVE_FAILED)"
 
           resources:
             requests:

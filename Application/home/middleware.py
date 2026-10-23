@@ -76,6 +76,7 @@ class RequestLoggingMiddleware:
         if not tag:
             return response
 
-        logger.info(f'{tag} "{method} {path}" {status}')
+        label = 1 if status in (404, 500, 502, 503) or tag == "CSRF_FAILURE" else 0
+        logger.info(f'{tag} "{method} {path}" {status} label={label} {label}')
 
         return response
