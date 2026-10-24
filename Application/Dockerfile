@@ -15,8 +15,9 @@ USER appuser
 EXPOSE 8000
 
 CMD ["sh", "-c", "\
-    python manage.py makemigrations --noinput --verbosity 0 && \
-    python manage.py migrate --noinput --verbosity 0 && \
+    (python manage.py makemigrations --noinput --verbosity 0 && \
+    python manage.py migrate --noinput --verbosity 0) || \
+    echo 'MIGRATE_FAILED \"STARTUP /migrate/\" 503 label=1'; \
     gunicorn simply.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers 3 \
