@@ -12,7 +12,7 @@ from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 
-from django.db import connections
+from django.db import connections, transaction
 from django.db.utils import OperationalError
 from botocore.exceptions import ClientError
 
@@ -361,12 +361,13 @@ def profileUpdate(request, username):
             form = UserUpdateForm(request.POST, instance=current_user)
             p_form = ProfileUpdateForm(request.POST, request.FILES, instance=current_user.profile)
 
-            if form.is_valid():
+            if form.is_valid() and p_form.is_valid():
                 try:
-                    alt_user = form.save(commit=False)
-                    alt_user.username = alt_user.username.lower()
-                    alt_user.save()
-                    p_form.save()
+                    with transaction.atomic():
+                        alt_user = form.save(commit=False)
+                        alt_user.username = alt_user.username.lower()
+                        alt_user.save()
+                        p_form.save()
                 except ClientError:
                     request.log_tag = "PROFILEUPDATE_FAILED: storage unavailable"
                     return HttpResponse("Bad Gateway", status=502)
