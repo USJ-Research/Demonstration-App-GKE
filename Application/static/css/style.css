@@ -513,6 +513,12 @@ a {
   vertical-align: middle;
 }
 
+.form__group input[type="checkbox"] + label {
+  display: inline;
+  margin-bottom: 0;
+  font-size: inherit;
+}
+
 .form__group input:focus,
 .form__group textarea:focus {
   border-color: var(--color-main);
