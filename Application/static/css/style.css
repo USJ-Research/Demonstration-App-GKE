@@ -494,7 +494,7 @@ a {
   margin-bottom: 1rem;
 }
 
-.form__group input,
+.form__group input:not([type="checkbox"]),
 .form__group textarea,
 .form__group select {
   background: transparent;
@@ -505,6 +505,12 @@ a {
   color: var(--color-light);
   font-weight: 500;
   outline: none;
+}
+
+.form__group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+  vertical-align: middle;
 }
 
 .form__group input:focus,
