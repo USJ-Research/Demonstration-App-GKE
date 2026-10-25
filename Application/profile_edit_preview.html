@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Edit your profile — preview</title>
+<style>
+  * { font-family: "Segoe UI", "DM Sans", -apple-system, Roboto, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #2d2d39; min-height: 820px; display: flex; align-items: center; justify-content: center; padding: 40px 0; }
+
+  .layout__box { width: 680px; background-color: #3f4156; border-radius: 10px; box-shadow: 1px 1px 6px 3px rgba(0,0,0,0.1); overflow: hidden; }
+
+  .layout__boxHeader { display: flex; align-items: center; gap: 15px; padding: 15px; background-color: #696d97; }
+  .layout__boxHeader svg { fill: #71c6dd; width: 20px; height: 20px; }
+  .layout__boxHeader h3 { margin: 0; text-transform: uppercase; font-weight: 500; color: #e5e5e5; font-size: 16px; }
+
+  .layout__body { margin: 30px; }
+
+  .form__group { margin-bottom: 20px; width: 100%; }
+  .form__group label { display: block; font-size: 15px; margin-bottom: 10px; color: #b2bdbd; }
+  .form__group input:not([type="checkbox"]) {
+    background: transparent; border: 1px solid #696d97; padding: 10px; border-radius: 3px;
+    width: 100%; color: #e5e5e5; font-weight: 500; outline: none; font-size: 14px;
+  }
+
+  .clear-checkbox-row { display: inline-block; margin-top: 0.2rem; }
+  .clear-checkbox-row label { display: inline; margin-bottom: 0; font-size: 14px; color: #e5e5e5; }
+  .clear-checkbox-row input[type="checkbox"] { width: auto; margin-left: 8px; vertical-align: middle; }
+
+  .form__action { display: flex; justify-content: flex-end; gap: 30px; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 4px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; text-decoration: none; }
+  .btn--dark { background-color: #696d97; color: #e5e5e5; }
+  .btn--main { background-color: #71c6dd; color: #3f4156; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="layout__box">
+  <div class="layout__boxHeader">
+    <svg viewBox="0 0 32 32"><path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"></path></svg>
+    <h3>Edit your profile</h3>
+  </div>
+
+  <div class="layout__body">
+
+    <div class="form__group">
+      <label>Username</label>
+      <input type="text" value="duvindu2">
+    </div>
+
+    <div class="form__group">
+      <label>Email</label>
+      <input type="email" value="duvindu.inbox@gmail.com">
+    </div>
+
+    <div class="form__group">
+      <label>Change Image</label>
+      <input type="file" style="font-size: 13px;">
+      <span class="clear-checkbox-row">
+        <label>Clear Image:</label>
+        <input type="checkbox">
+      </span>
+    </div>
+
+    <div class="form__action">
+      <a class="btn btn--dark" href="#">Cancel</a>
+      <button class="btn btn--main" type="button">Update</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

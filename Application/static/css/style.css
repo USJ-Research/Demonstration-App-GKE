@@ -507,16 +507,21 @@ a {
   outline: none;
 }
 
-.form__group input[type="checkbox"] {
-  width: auto;
-  margin-right: 0.5rem;
-  vertical-align: middle;
+.clear-checkbox-row {
+  display: inline-block;
+  margin-top: 0.2rem;
 }
 
-.form__group input[type="checkbox"] + label {
+.clear-checkbox-row label {
   display: inline;
   margin-bottom: 0;
   font-size: inherit;
+}
+
+.clear-checkbox-row input[type="checkbox"] {
+  width: auto;
+  margin-left: 0.5rem;
+  vertical-align: middle;
 }
 
 .form__group input:focus,
