@@ -452,17 +452,6 @@ def activityView(request):
         return HttpResponseServerError("Internal Server Error")
 
 
-def health(request):
-    for db_name in connections:
-        try:
-            connections[db_name].cursor()
-        except OperationalError:
-            request.log_tag = "HEALTH_FAILED"
-            return HttpResponse("Status: DB Down", status=503)
-    request.log_tag = "HEALTH_SUCCESS"
-    return HttpResponse("Health OK", status=200)
-
-
 def start(request):
     try:
         request.log_tag = "START_SUCCESS"
@@ -484,14 +473,12 @@ def ready(request):
 
 
 def live(request):
-    for db_name in connections:
-        try:
-            connections[db_name].cursor()
-        except OperationalError:
-            request.log_tag = "LIVE_FAILED"
-            return HttpResponse("Status: DB Down", status=503)
-    request.log_tag = "LIVE_SUCCESS"
-    return HttpResponse("Live", status=200)
+    try:
+        request.log_tag = "LIVE_SUCCESS"
+        return HttpResponse("Live", status=200)
+    except Exception:
+        request.log_tag = "LIVE_FAILED"
+        return HttpResponse("Live Failed", status=503)
 
 
 class CustomPasswordResetView(auth_views.PasswordResetView):
